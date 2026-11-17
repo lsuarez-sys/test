@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Position } from './entities/position.entity'; // or your model/schema import
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 
 @Injectable()
-export class PositionsService {
-  create(createPositionDto: CreatePositionDto) {
-    return 'This action adds a new position';
+public class PositionsService {
+  constructor(
+    @InjectRepository(Position)
+    private positionsRepository: Repository<Position>,
+  ) {}
+
+  // 1. CREATE - This replaces "This action adds a new position"
+  async create(createPositionDto: CreatePositionDto) {
+    const newPosition = this.positionsRepository.create(createPositionDto);
+    return await this.positionsRepository.save(newPosition);
   }
 
-  findAll() {
-    return `This action returns all positions`;
+  // 2. READ ALL - This replaces "This action returns all positions"
+  async findAll() {
+    return await this.positionsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} position`;
+  // 3. READ ONE
+  async findOne(id: number) {
+    return await this.positionsRepository.findOneBy({ id });
   }
 
-  update(id: number, updatePositionDto: UpdatePositionDto) {
-    return `This action updates a #${id} position`;
+  // 4. UPDATE
+  async update(id: number, updatePositionDto: UpdatePositionDto) {
+    await this.positionsRepository.update(id, updatePositionDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} position`;
+  // 5. DELETE
+  async remove(id: number) {
+    return await this.positionsRepository.delete(id);
   }
 }
