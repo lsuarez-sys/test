@@ -6,7 +6,7 @@ import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 
 @Injectable()
-public class PositionsService {
+export class PositionsService {
   constructor(
     @InjectRepository(Position)
     private positionsRepository: Repository<Position>,
