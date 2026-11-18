@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -22,15 +22,29 @@ export class UsersController {
 
   // Create user (open - for demo)
   @Post()
-  async create(@Body() body: { username: string; password: string }) {
-    return this.usersService.createUser(body.username, body.password);
+  async create(@Body() body: { username: string; password: string; role?: string }) {
+    try {
+      return await this.usersService.createUser(body.username, body.password, body.role || 'user');
+    } catch (err: any) {
+      if (err?.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException('Username is already taken');
+      }
+      throw err;
+    }
   }
 
   // Update user (protected)
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
-    return this.usersService.updateUser(+id, body);
+    try {
+      return await this.usersService.updateUser(+id, body);
+    } catch (err: any) {
+      if (err?.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException('Username is already taken');
+      }
+      throw err;
+    }
   }
 
   // Delete user (protected)

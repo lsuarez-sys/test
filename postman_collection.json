@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "c1f7a2d4-7b91-492e-9d21-f09b2e8e9142",
     "name": "LARS & SUAREZ Dashboard API (MySQL)",
-    "description": "Postman collection for testing the NestJS backend connected to MySQL and consumed by the Next.js Frontend Dashboard.",
+    "description": "Complete Postman collection for testing the NestJS backend connected to MySQL with Users and Positions CRUD.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -19,6 +19,11 @@
     {
       "key": "createdPositionId",
       "value": "5",
+      "type": "string"
+    },
+    {
+      "key": "createdUserId",
+      "value": "1",
       "type": "string"
     }
   ],
@@ -75,7 +80,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"postman_user\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"username\": \"postman_tester\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -109,7 +114,129 @@
       ]
     },
     {
-      "name": "2. Positions (Dashboard CRUD)",
+      "name": "2. Users (Dashboard & MySQL)",
+      "item": [
+        {
+          "name": "Get All Users (Includes Own User)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Fetches all users from MySQL 'users' table (displayed on Dashboard Users table, including current logged in user)."
+          }
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.id) {",
+                  "    pm.collectionVariables.set('createdUserId', response.id);",
+                  "    console.log('Created user ID saved:', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"new_member\",\n  \"password\": \"password123\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Creates a new user in MySQL."
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{createdUserId}}"]
+            },
+            "description": "Fetches single user details by ID."
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{createdUserId}}"]
+            },
+            "description": "Updates user fields such as role or password."
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{createdUserId}}"]
+            },
+            "description": "Deletes a user from MySQL."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Positions (Dashboard CRUD)",
       "item": [
         {
           "name": "Get All Positions",
