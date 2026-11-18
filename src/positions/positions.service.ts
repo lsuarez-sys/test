@@ -46,15 +46,17 @@ export class PositionsService {
     const pool = this.databaseService.getPool();
     await this.findOne(id); // Ensures it exists
 
-    const fields = Object.keys(updatePositionDto);
-    const values = Object.values(updatePositionDto);
+    // Exclude id from updated fields so primary key is not modified
+    const { id: _id, ...safeFields } = updatePositionDto as any;
+    const fields = Object.keys(safeFields);
+    const values = Object.values(safeFields);
 
     if (fields.length === 0) {
       return this.findOne(id);
     }
 
     const setClause = fields.map((field) => `${field} = ?`).join(', ');
-    await pool.execute(
+    await (pool as any).execute(
       `UPDATE positions SET ${setClause} WHERE id = ?`,
       [...values, id]
     );

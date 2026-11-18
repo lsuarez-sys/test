@@ -1,0 +1,238 @@
+{
+  "info": {
+    "_postman_id": "c1f7a2d4-7b91-492e-9d21-f09b2e8e9142",
+    "name": "LARS & SUAREZ Dashboard API (MySQL)",
+    "description": "Postman collection for testing the NestJS backend connected to MySQL and consumed by the Next.js Frontend Dashboard.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdPositionId",
+      "value": "5",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"postman_user\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registers a new user in the MySQL 'users' table."
+          }
+        },
+        {
+          "name": "Login (Auto-saves Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.accessToken) {",
+                  "    pm.collectionVariables.set('token', response.accessToken);",
+                  "    console.log('Access token saved to collection variable:', response.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"postman_user\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Logs in and stores the JWT access token in {{token}}."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Positions (Dashboard CRUD)",
+      "item": [
+        {
+          "name": "Get All Positions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/positions",
+              "host": ["{{baseUrl}}"],
+              "path": ["positions"]
+            },
+            "description": "Fetches all positions from the MySQL 'positions' table (used by the dashboard table)."
+          }
+        },
+        {
+          "name": "Create Position",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.id) {",
+                  "    pm.collectionVariables.set('createdPositionId', response.id);",
+                  "    console.log('Created position ID saved:', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position_code\": \"DEV\",\n  \"position_name\": \"Lead Developer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/positions",
+              "host": ["{{baseUrl}}"],
+              "path": ["positions"]
+            },
+            "description": "Inserts a new row into the MySQL 'positions' table."
+          }
+        },
+        {
+          "name": "Get Position by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/positions/{{createdPositionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["positions", "{{createdPositionId}}"]
+            },
+            "description": "Fetches single position by ID (used by dashboard 'Read' button)."
+          }
+        },
+        {
+          "name": "Update Position (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position_code\": \"SR_DEV\",\n  \"position_name\": \"Senior Lead Developer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/positions/{{createdPositionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["positions", "{{createdPositionId}}"]
+            },
+            "description": "Updates position details in MySQL."
+          }
+        },
+        {
+          "name": "Delete Position",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/positions/{{createdPositionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["positions", "{{createdPositionId}}"]
+            },
+            "description": "Deletes the position row from MySQL."
+          }
+        }
+      ]
+    }
+  ]
+}
